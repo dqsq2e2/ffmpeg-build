@@ -80,18 +80,32 @@ jobs:
             if [ -d "$d" ]; then
               echo "Processing $d..."
               # Inside might be ffmpeg-version-linux-arch folder or direct files
-              # Based on build scripts, it creates a folder structure inside artifacts
+              
+              # Use absolute path for tar output
+              output_path="$(pwd)/release/$(basename "$d").tar.gz"
+              
+              # Change to the directory $d and tar everything inside
+              # This assumes the artifact IS the folder structure we want
+              # e.g. artifacts/ffmpeg-linux-arm64/ffmpeg/...
+              
+              # But based on build-linux.sh, the artifact is a directory like ffmpeg-8.0-linux-arm64
+              # So inside artifacts/ffmpeg-linux-arm64/ there is ffmpeg-8.0-linux-arm64/
               
               # Find the actual content folder inside
               content_dir=$(find "$d" -maxdepth 1 -type d -name "ffmpeg-*" | head -n 1)
+              
               if [ -n "$content_dir" ]; then
-                  name=$(basename "$content_dir")
-                  # Use -C to change to parent of content_dir so we archive the folder itself
-                  # But content_dir includes $d prefix from find (e.g. ffmpeg-linux-arm64/ffmpeg-8.0-linux-arm64)
-                  # We need to change to $d and archive the folder name inside
-                  
                   inner_name=$(basename "$content_dir")
+                  # Use full path for output archive to avoid confusion with relative paths
+                  # -C "$d" means change to directory "$d"
+                  # "$inner_name" is the folder inside "$d" to archive
+                  
+                  echo "Archiving $inner_name from inside $d..."
                   tar czf "release/$inner_name.tar.gz" -C "$d" "$inner_name"
+              else
+                  # Fallback if structure is flat (no inner folder)
+                  echo "No inner folder found, archiving content of $d directly..."
+                  tar czf "release/$(basename "$d").tar.gz" -C "$d" .
               fi
             fi
           done
@@ -103,7 +117,11 @@ jobs:
               content_dir=$(find "$d" -maxdepth 1 -type d -name "ffmpeg-*" | head -n 1)
               if [ -n "$content_dir" ]; then
                   inner_name=$(basename "$content_dir")
+                  echo "Archiving $inner_name from inside $d..."
                   tar czf "release/$inner_name.tar.gz" -C "$d" "$inner_name"
+              else
+                  echo "No inner folder found, archiving content of $d directly..."
+                  tar czf "release/$(basename "$d").tar.gz" -C "$d" .
               fi
             fi
           done
