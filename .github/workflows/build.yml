@@ -86,7 +86,12 @@ jobs:
               content_dir=$(find "$d" -maxdepth 1 -type d -name "ffmpeg-*" | head -n 1)
               if [ -n "$content_dir" ]; then
                   name=$(basename "$content_dir")
-                  tar czf "release/$name.tar.gz" -C "$d" "$name"
+                  # Use -C to change to parent of content_dir so we archive the folder itself
+                  # But content_dir includes $d prefix from find (e.g. ffmpeg-linux-arm64/ffmpeg-8.0-linux-arm64)
+                  # We need to change to $d and archive the folder name inside
+                  
+                  inner_name=$(basename "$content_dir")
+                  tar czf "release/$inner_name.tar.gz" -C "$d" "$inner_name"
               fi
             fi
           done
@@ -97,8 +102,8 @@ jobs:
               echo "Processing $d..."
               content_dir=$(find "$d" -maxdepth 1 -type d -name "ffmpeg-*" | head -n 1)
               if [ -n "$content_dir" ]; then
-                  name=$(basename "$content_dir")
-                  tar czf "release/$name.tar.gz" -C "$d" "$name"
+                  inner_name=$(basename "$content_dir")
+                  tar czf "release/$inner_name.tar.gz" -C "$d" "$inner_name"
               fi
             fi
           done
