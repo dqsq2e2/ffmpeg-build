@@ -49,6 +49,14 @@ FFMPEG_CONFIGURE_FLAGS=(
     --enable-protocol=file
     --enable-protocol=pipe
 
+    --enable-decoder=mjpeg
+    --enable-decoder=png
+    --enable-decoder=webp
+    --enable-decoder=gif
+    --enable-encoder=mjpeg
+    --enable-encoder=png
+    --enable-encoder=webp
+
     --enable-demuxer=image2
     --enable-demuxer=aac
     --enable-demuxer=ac3
@@ -179,4 +187,7 @@ FFMPEG_CONFIGURE_FLAGS=(
     --enable-parser=mpegaudio
     --enable-parser=tak
     --enable-parser=vorbis
+    --enable-parser=mjpeg
+    --enable-parser=png
+    --enable-parser=webp
 )
