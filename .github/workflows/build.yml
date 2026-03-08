@@ -79,32 +79,18 @@ jobs:
           for d in ffmpeg-linux-*; do
             if [ -d "$d" ]; then
               echo "Processing $d..."
-              # Inside might be ffmpeg-version-linux-arch folder or direct files
               
-              # Use absolute path for tar output
-              output_path="$(pwd)/release/$(basename "$d").tar.gz"
-              
-              # Change to the directory $d and tar everything inside
-              # This assumes the artifact IS the folder structure we want
-              # e.g. artifacts/ffmpeg-linux-arm64/ffmpeg/...
-              
-              # But based on build-linux.sh, the artifact is a directory like ffmpeg-8.0-linux-arm64
-              # So inside artifacts/ffmpeg-linux-arm64/ there is ffmpeg-8.0-linux-arm64/
-              
-              # Find the actual content folder inside
-              content_dir=$(find "$d" -maxdepth 1 -type d -name "ffmpeg-*" | head -n 1)
+              # Find the actual content folder inside, excluding the parent $d itself
+              content_dir=$(find "$d" -mindepth 1 -maxdepth 1 -type d -name "ffmpeg-*" | head -n 1)
               
               if [ -n "$content_dir" ]; then
                   inner_name=$(basename "$content_dir")
-                  # Use full path for output archive to avoid confusion with relative paths
-                  # -C "$d" means change to directory "$d"
-                  # "$inner_name" is the folder inside "$d" to archive
-                  
                   echo "Archiving $inner_name from inside $d..."
                   tar czf "release/$inner_name.tar.gz" -C "$d" "$inner_name"
               else
                   # Fallback if structure is flat (no inner folder)
                   echo "No inner folder found, archiving content of $d directly..."
+                  # Use the folder name as the archive name
                   tar czf "release/$(basename "$d").tar.gz" -C "$d" .
               fi
             fi
@@ -114,7 +100,9 @@ jobs:
           for d in ffmpeg-windows-*; do
             if [ -d "$d" ]; then
               echo "Processing $d..."
-              content_dir=$(find "$d" -maxdepth 1 -type d -name "ffmpeg-*" | head -n 1)
+              # Find the actual content folder inside, excluding the parent $d itself
+              content_dir=$(find "$d" -mindepth 1 -maxdepth 1 -type d -name "ffmpeg-*" | head -n 1)
+              
               if [ -n "$content_dir" ]; then
                   inner_name=$(basename "$content_dir")
                   echo "Archiving $inner_name from inside $d..."
