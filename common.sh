@@ -57,6 +57,15 @@ FFMPEG_CONFIGURE_FLAGS=(
     --enable-encoder=png
     --enable-encoder=webp
 
+    --enable-muxer=image2
+    --enable-muxer=mjpeg
+    --enable-muxer=mp3
+    --enable-muxer=flac
+    --enable-muxer=wav
+    --enable-muxer=ogg
+    --enable-muxer=adts
+    --enable-muxer=null
+
     --enable-demuxer=image2
     --enable-demuxer=aac
     --enable-demuxer=ac3
