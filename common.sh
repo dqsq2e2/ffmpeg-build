@@ -32,6 +32,7 @@ FFMPEG_CONFIGURE_FLAGS=(
     --disable-encoders
     --disable-decoders
     --disable-hwaccels
+    --disable-opencl
     --disable-nvenc
     --disable-videotoolbox
     --disable-audiotoolbox
