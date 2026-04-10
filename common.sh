@@ -16,7 +16,7 @@ FFMPEG_CONFIGURE_FLAGS=(
     --disable-programs
     --enable-ffmpeg
     --enable-ffprobe
-    --disable-network
+    --enable-network
     --disable-muxers
     --disable-demuxers
     --disable-zlib
@@ -49,6 +49,10 @@ FFMPEG_CONFIGURE_FLAGS=(
     --disable-protocols
     --enable-protocol=file
     --enable-protocol=pipe
+    --enable-protocol=http
+    --enable-protocol=https
+    --enable-protocol=tcp
+    --enable-protocol=tls
 
     --enable-decoder=mjpeg
     --enable-decoder=png
