@@ -25,11 +25,20 @@ FFMPEG_CONFIGURE_FLAGS=(
     --disable-iconv
     --disable-libxcb
     --disable-bsfs
+    --enable-bsf=aac_adtstoasc
+    --enable-bsf=h264_mp4toannexb
+    --enable-bsf=hevc_mp4toannexb
     --disable-filters
     --disable-parsers
     --disable-indevs
     --disable-outdevs
     --disable-encoders
+    --enable-encoder=aac
+    --enable-encoder=pcm_s16le
+    --enable-encoder=pcm_s24le
+    --enable-encoder=pcm_s32le
+    --enable-encoder=flac
+    --enable-encoder=alac
     --disable-decoders
     --disable-hwaccels
     --disable-opencl
@@ -70,6 +79,9 @@ FFMPEG_CONFIGURE_FLAGS=(
     --enable-muxer=ogg
     --enable-muxer=adts
     --enable-muxer=null
+    --enable-muxer=hls
+    --enable-muxer=mpegts
+    --enable-muxer=segment
 
     --enable-demuxer=image2
     --enable-demuxer=aac
@@ -116,6 +128,8 @@ FFMPEG_CONFIGURE_FLAGS=(
     --enable-demuxer=wv
     --enable-demuxer=xwma
     --enable-demuxer=dsf
+    --enable-demuxer=mpegts
+    --enable-demuxer=hls
 
     --enable-decoder=aac
     --enable-decoder=aac_latm
