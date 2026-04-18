@@ -20,6 +20,11 @@ jobs:
       ARCH: ${{ matrix.arch }}
     steps:
       - uses: actions/checkout@v3
+      - name: Clean previous downloads
+        run: |
+          # Remove potentially corrupted downloads from previous runs
+          rm -f lame-*.tar.gz openssl-*.tar.gz ffmpeg-*.tar.gz
+          rm -rf deps-* build.* artifacts/
       - name: Install dependencies
         run: |
           sudo apt-get update -y && \
@@ -47,6 +52,11 @@ jobs:
       ARCH: ${{ matrix.arch }}
     steps:
       - uses: actions/checkout@v3
+      - name: Clean previous downloads
+        run: |
+          # Remove potentially corrupted downloads from previous runs
+          rm -f lame-*.tar.gz openssl-*.tar.gz ffmpeg-*.tar.gz
+          rm -rf deps-* build.* artifacts/
       - name: Install dependencies
         run: |
           sudo apt-get update -y && \
