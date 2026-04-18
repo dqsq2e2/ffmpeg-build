@@ -61,6 +61,7 @@ FFMPEG_CONFIGURE_FLAGS=(
     --enable-protocol=http
     --enable-protocol=https
     --enable-protocol=tcp
+    --enable-protocol=udp
     --enable-protocol=tls
 
     --enable-decoder=mjpeg
