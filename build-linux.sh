@@ -97,7 +97,8 @@ cd openssl-$OPENSSL_VERSION
     --prefix=$DEPS_DIR \
     --openssldir=$DEPS_DIR/ssl \
     no-shared \
-    no-tests
+    no-tests \
+    -Os
 
 make -j$(nproc 2>/dev/null || echo 4)
 make install_sw install_ssldirs
@@ -156,7 +157,8 @@ cd lame-$LAME_VERSION
     --prefix=$DEPS_DIR \
     --disable-shared \
     --enable-static \
-    --disable-frontend
+    --disable-frontend \
+    CFLAGS="-Os"
 make -j$(nproc 2>/dev/null || echo 4)
 make install
 
@@ -182,8 +184,8 @@ tar --strip-components=1 -xf $BASE_DIR/$FFMPEG_TARBALL
 
 FFMPEG_CONFIGURE_FLAGS+=(
     --prefix=$BASE_DIR/$OUTPUT_DIR
-    --extra-cflags="-I$DEPS_DIR/include"
-    --extra-ldflags="-L$DEPS_DIR/lib"
+    --extra-cflags="-I$DEPS_DIR/include -Os"
+    --extra-ldflags="-L$DEPS_DIR/lib -Wl,--gc-sections"
     --extra-libs="-lpthread -lm"
     --enable-gpl
     --enable-version3
@@ -192,6 +194,7 @@ FFMPEG_CONFIGURE_FLAGS+=(
     --enable-libmp3lame
     --enable-encoder=libmp3lame
     --enable-filter=aresample
+    --enable-small
 )
 
 # Debug: Print PKG_CONFIG_PATH
@@ -208,5 +211,15 @@ pkg-config --modversion openssl 2>/dev/null || echo "Cannot get OpenSSL version"
 
 make
 make install
+
+# Strip binaries to reduce size
+echo "Stripping binaries to reduce size..."
+strip $BASE_DIR/$OUTPUT_DIR/bin/ffmpeg
+strip $BASE_DIR/$OUTPUT_DIR/bin/ffprobe
+
+# Show final sizes
+echo "Final binary sizes:"
+ls -lh $BASE_DIR/$OUTPUT_DIR/bin/ffmpeg
+ls -lh $BASE_DIR/$OUTPUT_DIR/bin/ffprobe
 
 chown $(stat -c '%u:%g' $BASE_DIR) -R $BASE_DIR/$OUTPUT_DIR
