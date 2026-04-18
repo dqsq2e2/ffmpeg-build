@@ -181,6 +181,7 @@ FFMPEG_CONFIGURE_FLAGS+=(
     --extra-cflags="-I$DEPS_DIR/include"
     --extra-ldflags="-L$DEPS_DIR/lib"
     --enable-gpl
+    --enable-version3
     --enable-openssl
     --enable-libmp3lame
     --enable-encoder=libmp3lame
