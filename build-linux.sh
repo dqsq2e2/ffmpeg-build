@@ -20,16 +20,59 @@ LAME_URL=https://downloads.sourceforge.net/project/lame/lame/$LAME_VERSION/$LAME
 if [ ! -e $LAME_TARBALL ]; then
     echo "Downloading Lame $LAME_VERSION..."
     curl -s -L -o $LAME_TARBALL $LAME_URL
+    
+    # Verify download
+    if [ ! -s $LAME_TARBALL ]; then
+        echo "Error: Lame download failed (empty file)"
+        rm -f $LAME_TARBALL
+        exit 1
+    fi
+    
+    # Verify it's a valid gzip file
+    if ! gzip -t $LAME_TARBALL 2>/dev/null; then
+        echo "Error: Downloaded Lame file is not a valid gzip archive"
+        rm -f $LAME_TARBALL
+        exit 1
+    fi
+    
+    echo "Lame download verified successfully"
 fi
 
 # OpenSSL configuration (for HTTPS support)
 OPENSSL_VERSION=3.0.15
 OPENSSL_TARBALL=openssl-$OPENSSL_VERSION.tar.gz
 OPENSSL_URL=https://www.openssl.org/source/$OPENSSL_TARBALL
+OPENSSL_SHA256=23c666d0edf20f14249b3d8f0368acaee9ab585b09e1de82107c66e1f3ec9533
 
 if [ ! -e $OPENSSL_TARBALL ]; then
     echo "Downloading OpenSSL $OPENSSL_VERSION..."
     curl -s -L -o $OPENSSL_TARBALL $OPENSSL_URL
+    
+    # Verify download
+    if [ ! -s $OPENSSL_TARBALL ]; then
+        echo "Error: OpenSSL download failed (empty file)"
+        rm -f $OPENSSL_TARBALL
+        exit 1
+    fi
+    
+    # Verify it's a valid gzip file
+    if ! gzip -t $OPENSSL_TARBALL 2>/dev/null; then
+        echo "Error: Downloaded OpenSSL file is not a valid gzip archive"
+        echo "File size: $(stat -c%s $OPENSSL_TARBALL 2>/dev/null || stat -f%z $OPENSSL_TARBALL 2>/dev/null || echo 'unknown')"
+        rm -f $OPENSSL_TARBALL
+        exit 1
+    fi
+    
+    # Verify SHA256 checksum
+    if command -v sha256sum >/dev/null 2>&1; then
+        echo "$OPENSSL_SHA256  $OPENSSL_TARBALL" | sha256sum -c - || {
+            echo "Error: OpenSSL checksum verification failed"
+            rm -f $OPENSSL_TARBALL
+            exit 1
+        }
+    fi
+    
+    echo "OpenSSL download verified successfully"
 fi
 
 : ${ARCH?}
