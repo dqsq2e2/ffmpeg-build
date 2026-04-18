@@ -267,13 +267,25 @@ FFMPEG_CONFIGURE_FLAGS+=(
     --prefix=$BASE_DIR/$OUTPUT_DIR
     --extra-cflags="-I$DEPS_DIR/include"
     --extra-ldflags="-L$DEPS_DIR/lib"
+    --extra-libs="-lpthread -lm"
     --enable-gpl
     --enable-version3
     --enable-openssl
+    --enable-nonfree
     --enable-libmp3lame
     --enable-encoder=libmp3lame
     --enable-filter=aresample
 )
+
+# Debug: Print PKG_CONFIG_PATH
+echo "PKG_CONFIG_PATH=$PKG_CONFIG_PATH"
+echo "Contents of $DEPS_DIR/lib/pkgconfig:"
+ls -la $DEPS_DIR/lib/pkgconfig/ || echo "Directory not found"
+echo "Content of openssl.pc:"
+cat $DEPS_DIR/lib/pkgconfig/openssl.pc || echo "File not found"
+echo "Checking pkg-config for openssl:"
+pkg-config --exists openssl && echo "OpenSSL found via pkg-config" || echo "OpenSSL NOT found via pkg-config"
+pkg-config --modversion openssl 2>/dev/null || echo "Cannot get OpenSSL version"
 
 ./configure "${FFMPEG_CONFIGURE_FLAGS[@]}" || (cat ffbuild/config.log && exit 1)
 
