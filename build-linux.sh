@@ -183,6 +183,48 @@ eval $OPENSSL_CONFIGURE_CMD
 make -j$(nproc 2>/dev/null || echo 4)
 make install_sw install_ssldirs
 
+# Create pkg-config files for OpenSSL
+mkdir -p $DEPS_DIR/lib/pkgconfig
+
+cat > $DEPS_DIR/lib/pkgconfig/openssl.pc <<EOF
+prefix=$DEPS_DIR
+exec_prefix=\${prefix}
+libdir=\${exec_prefix}/lib
+includedir=\${prefix}/include
+
+Name: OpenSSL
+Description: Secure Sockets Layer and cryptography libraries and tools
+Version: $OPENSSL_VERSION
+Requires: libssl libcrypto
+EOF
+
+cat > $DEPS_DIR/lib/pkgconfig/libssl.pc <<EOF
+prefix=$DEPS_DIR
+exec_prefix=\${prefix}
+libdir=\${exec_prefix}/lib
+includedir=\${prefix}/include
+
+Name: OpenSSL-libssl
+Description: Secure Sockets Layer and cryptography libraries
+Version: $OPENSSL_VERSION
+Requires.private: libcrypto
+Libs: -L\${libdir} -lssl
+Cflags: -I\${includedir}
+EOF
+
+cat > $DEPS_DIR/lib/pkgconfig/libcrypto.pc <<EOF
+prefix=$DEPS_DIR
+exec_prefix=\${prefix}
+libdir=\${exec_prefix}/lib
+includedir=\${prefix}/include
+
+Name: OpenSSL-libcrypto
+Description: OpenSSL cryptography library
+Version: $OPENSSL_VERSION
+Libs: -L\${libdir} -lcrypto
+Cflags: -I\${includedir}
+EOF
+
 # Build LAME
 echo "Building Lame..."
 cd $BUILD_DIR
