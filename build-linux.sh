@@ -40,6 +40,7 @@ LAME_HOST=""
 LAME_CFLAGS=""
 OPENSSL_TARGET=""
 OPENSSL_EXTRA_FLAGS=""
+OPENSSL_CROSS_COMPILE=""
 
 case $ARCH in
     x86_64)
@@ -60,6 +61,7 @@ case $ARCH in
         )
         LAME_HOST="aarch64-linux-gnu"
         OPENSSL_TARGET="linux-aarch64"
+        OPENSSL_CROSS_COMPILE="aarch64-linux-gnu-"
         ;;
     arm*)
         FFMPEG_CONFIGURE_FLAGS+=(
@@ -70,6 +72,7 @@ case $ARCH in
         )
         LAME_HOST="arm-linux-gnueabihf"
         OPENSSL_TARGET="linux-armv4"
+        OPENSSL_CROSS_COMPILE="arm-linux-gnueabihf-"
         case $ARCH in
             armv7-a)
                 FFMPEG_CONFIGURE_FLAGS+=(
@@ -115,12 +118,25 @@ echo "Building OpenSSL..."
 cd $BUILD_DIR
 tar -xf $BASE_DIR/$OPENSSL_TARBALL
 cd openssl-$OPENSSL_VERSION
-./Configure $OPENSSL_TARGET \
+
+# Configure OpenSSL with cross-compile support
+OPENSSL_CONFIGURE_CMD="./Configure $OPENSSL_TARGET \
     --prefix=$DEPS_DIR \
     --openssldir=$DEPS_DIR/ssl \
     no-shared \
-    no-tests \
-    ${OPENSSL_EXTRA_FLAGS:+$OPENSSL_EXTRA_FLAGS}
+    no-tests"
+
+# Add cross-compile prefix if set
+if [ -n "$OPENSSL_CROSS_COMPILE" ]; then
+    OPENSSL_CONFIGURE_CMD="$OPENSSL_CONFIGURE_CMD --cross-compile-prefix=$OPENSSL_CROSS_COMPILE"
+fi
+
+# Add extra flags if set
+if [ -n "$OPENSSL_EXTRA_FLAGS" ]; then
+    OPENSSL_CONFIGURE_CMD="$OPENSSL_CONFIGURE_CMD $OPENSSL_EXTRA_FLAGS"
+fi
+
+eval $OPENSSL_CONFIGURE_CMD
 make -j$(nproc 2>/dev/null || echo 4)
 make install_sw install_ssldirs
 
