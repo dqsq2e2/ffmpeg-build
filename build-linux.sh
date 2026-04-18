@@ -225,6 +225,9 @@ Libs: -L\${libdir} -lcrypto
 Cflags: -I\${includedir}
 EOF
 
+# Set PKG_CONFIG_PATH to include our dependencies
+export PKG_CONFIG_PATH=$DEPS_DIR/lib/pkgconfig:${PKG_CONFIG_PATH:-}
+
 # Build LAME
 echo "Building Lame..."
 cd $BUILD_DIR
@@ -255,7 +258,6 @@ Libs: -L\${libdir} -lmp3lame
 Cflags: -I\${includedir}
 EOF
 
-export PKG_CONFIG_PATH=$DEPS_DIR/lib/pkgconfig:${PKG_CONFIG_PATH:-}
 cd $BUILD_DIR
 
 cd $BUILD_DIR
