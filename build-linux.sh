@@ -22,19 +22,34 @@ if [ ! -e $LAME_TARBALL ]; then
     curl -s -L -o $LAME_TARBALL $LAME_URL
 fi
 
+# OpenSSL configuration (for HTTPS support)
+OPENSSL_VERSION=3.0.15
+OPENSSL_TARBALL=openssl-$OPENSSL_VERSION.tar.gz
+OPENSSL_URL=https://www.openssl.org/source/$OPENSSL_TARBALL
+
+if [ ! -e $OPENSSL_TARBALL ]; then
+    echo "Downloading OpenSSL $OPENSSL_VERSION..."
+    curl -s -L -o $OPENSSL_TARBALL $OPENSSL_URL
+fi
+
 : ${ARCH?}
 
 OUTPUT_DIR=artifacts/ffmpeg-$FFMPEG_VERSION-audio-$ARCH-linux-gnu
 
 LAME_HOST=""
 LAME_CFLAGS=""
+OPENSSL_TARGET=""
+OPENSSL_EXTRA_FLAGS=""
 
 case $ARCH in
     x86_64)
+        OPENSSL_TARGET="linux-x86_64"
         ;;
     i686)
         FFMPEG_CONFIGURE_FLAGS+=(--cc="gcc -m32")
         LAME_CFLAGS="-m32"
+        OPENSSL_TARGET="linux-x86"
+        OPENSSL_EXTRA_FLAGS="-m32"
         ;;
     arm64)
         FFMPEG_CONFIGURE_FLAGS+=(
@@ -44,6 +59,7 @@ case $ARCH in
             --arch=aarch64
         )
         LAME_HOST="aarch64-linux-gnu"
+        OPENSSL_TARGET="linux-aarch64"
         ;;
     arm*)
         FFMPEG_CONFIGURE_FLAGS+=(
@@ -53,6 +69,7 @@ case $ARCH in
             --arch=arm
         )
         LAME_HOST="arm-linux-gnueabihf"
+        OPENSSL_TARGET="linux-armv4"
         case $ARCH in
             armv7-a)
                 FFMPEG_CONFIGURE_FLAGS+=(
@@ -92,6 +109,20 @@ trap 'rm -rf $BUILD_DIR' EXIT
 # Build dependencies directory
 DEPS_DIR=$BASE_DIR/deps-$ARCH
 mkdir -p $DEPS_DIR
+
+# Build OpenSSL
+echo "Building OpenSSL..."
+cd $BUILD_DIR
+tar -xf $BASE_DIR/$OPENSSL_TARBALL
+cd openssl-$OPENSSL_VERSION
+./Configure $OPENSSL_TARGET \
+    --prefix=$DEPS_DIR \
+    --openssldir=$DEPS_DIR/ssl \
+    no-shared \
+    no-tests \
+    ${OPENSSL_EXTRA_FLAGS:+$OPENSSL_EXTRA_FLAGS}
+make -j$(nproc 2>/dev/null || echo 4)
+make install_sw install_ssldirs
 
 # Build LAME
 echo "Building Lame..."
@@ -134,6 +165,7 @@ FFMPEG_CONFIGURE_FLAGS+=(
     --extra-cflags="-I$DEPS_DIR/include"
     --extra-ldflags="-L$DEPS_DIR/lib"
     --enable-gpl
+    --enable-openssl
     --enable-libmp3lame
     --enable-encoder=libmp3lame
     --enable-filter=aresample
