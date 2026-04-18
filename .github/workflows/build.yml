@@ -10,12 +10,14 @@ on:
 
 jobs:
   package-linux:
-    runs-on: ubuntu-22.04
     strategy:
       matrix:
-        arch:
-          - x86_64
-          - arm64
+        include:
+          - arch: x86_64
+            runner: ubuntu-22.04
+          - arch: arm64
+            runner: ubuntu-22.04-arm
+    runs-on: ${{ matrix.runner }}
     env:
       ARCH: ${{ matrix.arch }}
     steps:
@@ -29,11 +31,6 @@ jobs:
         run: |
           sudo apt-get update -y && \
           sudo apt-get install -y nasm pkg-config
-      - name: Install ARM64 compiler
-        if: env.ARCH == 'arm64'
-        run: |
-          sudo apt-get update -y && \
-          sudo apt-get install -y gcc-aarch64-linux-gnu
       - name: Build
         run: ./build-linux.sh
       - name: Archive production artifacts
