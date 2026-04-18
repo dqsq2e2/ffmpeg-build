@@ -79,7 +79,6 @@ FFMPEG_CONFIGURE_FLAGS=(
     --enable-muxer=ogg
     --enable-muxer=adts
     --enable-muxer=null
-    --enable-muxer=mpegts
     --enable-muxer=segment
 
     --enable-demuxer=image2
@@ -127,7 +126,6 @@ FFMPEG_CONFIGURE_FLAGS=(
     --enable-demuxer=wv
     --enable-demuxer=xwma
     --enable-demuxer=dsf
-    --enable-demuxer=mpegts
 
     --enable-decoder=aac
     --enable-decoder=aac_latm
